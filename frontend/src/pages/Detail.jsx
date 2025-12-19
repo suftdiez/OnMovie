@@ -105,12 +105,28 @@ function Detail() {
       return;
     }
     const contentType = isSeries ? 'series' : 'movie';
-    if (isFavorite) {
-      await removeFromFavorites(user.uid, id, contentType);
-      setIsFavorite(false);
-    } else {
-      await addToFavorites(user.uid, item, contentType);
-      setIsFavorite(true);
+    try {
+      if (isFavorite) {
+        const result = await removeFromFavorites(user.uid, id, contentType);
+        if (result.success) {
+          setIsFavorite(false);
+        } else {
+          console.error('Remove favorite failed:', result.error);
+          alert('Failed to remove from favorites: ' + (result.error?.message || 'Unknown error'));
+        }
+      } else {
+        console.log('Adding to favorites:', { userId: user.uid, item, contentType });
+        const result = await addToFavorites(user.uid, item, contentType);
+        if (result.success) {
+          setIsFavorite(true);
+        } else {
+          console.error('Add favorite failed:', result.error);
+          alert('Failed to add to favorites: ' + (result.error?.message || 'Unknown error'));
+        }
+      }
+    } catch (error) {
+      console.error('Favorite error:', error);
+      alert('Error: ' + error.message);
     }
   };
 
@@ -121,12 +137,28 @@ function Detail() {
       return;
     }
     const contentType = isSeries ? 'series' : 'movie';
-    if (isWatchlisted) {
-      await removeFromWatchlist(user.uid, id, contentType);
-      setIsWatchlisted(false);
-    } else {
-      await addToWatchlist(user.uid, item, contentType);
-      setIsWatchlisted(true);
+    try {
+      if (isWatchlisted) {
+        const result = await removeFromWatchlist(user.uid, id, contentType);
+        if (result.success) {
+          setIsWatchlisted(false);
+        } else {
+          console.error('Remove watchlist failed:', result.error);
+          alert('Failed to remove from watchlist: ' + (result.error?.message || 'Unknown error'));
+        }
+      } else {
+        console.log('Adding to watchlist:', { userId: user.uid, item, contentType });
+        const result = await addToWatchlist(user.uid, item, contentType);
+        if (result.success) {
+          setIsWatchlisted(true);
+        } else {
+          console.error('Add watchlist failed:', result.error);
+          alert('Failed to add to watchlist: ' + (result.error?.message || 'Unknown error'));
+        }
+      }
+    } catch (error) {
+      console.error('Watchlist error:', error);
+      alert('Error: ' + error.message);
     }
   };
 

@@ -3,13 +3,15 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
+// Use environment variables for security
+// Create a .env file in frontend/ with these values
 const firebaseConfig = {
-  apiKey: "AIzaSyDmoReZd9LjmpkoCf7-NtgJuOQu8Yu8dfc",
-  authDomain: "onmovie-944fa.firebaseapp.com",
-  projectId: "onmovie-944fa",
-  storageBucket: "onmovie-944fa.firebasestorage.app",
-  messagingSenderId: "162579440358",
-  appId: "1:162579440358:web:9faa0061e3ca859108d127"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Initialize Firebase

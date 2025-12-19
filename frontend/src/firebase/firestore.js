@@ -18,15 +18,26 @@ import { db } from "./config";
 export const addToFavorites = async (userId, item, type = "movie") => {
   try {
     const docRef = doc(db, "users", userId, "favorites", `${type}_${item.id}`);
-    await setDoc(docRef, {
+    
+    // Extract year from various possible fields
+    const year = item.year || 
+                 (item.release_date ? item.release_date.split('-')[0] : null) ||
+                 (item.first_air_date ? item.first_air_date.split('-')[0] : null) ||
+                 (item.diterbitkan ? item.diterbitkan.split('-')[0] : null) ||
+                 null;
+    
+    // Build data object, excluding undefined values
+    const data = {
       id: item.id,
-      title: item.title,
-      poster: item.poster || item.images || item.image,
-      rating: item.rating,
-      year: item.year,
+      title: item.title || item.name || 'Unknown',
+      poster: item.poster || item.poster_path || item.images || item.image || null,
+      rating: item.rating || item.vote_average || null,
+      year: year,
       type: type,
       addedAt: serverTimestamp()
-    });
+    };
+    
+    await setDoc(docRef, data);
     return { success: true };
   } catch (error) {
     console.error("Error adding to favorites:", error);
@@ -79,15 +90,26 @@ export const isInFavorites = async (userId, itemId, type = "movie") => {
 export const addToWatchlist = async (userId, item, type = "movie") => {
   try {
     const docRef = doc(db, "users", userId, "watchlist", `${type}_${item.id}`);
-    await setDoc(docRef, {
+    
+    // Extract year from various possible fields
+    const year = item.year || 
+                 (item.release_date ? item.release_date.split('-')[0] : null) ||
+                 (item.first_air_date ? item.first_air_date.split('-')[0] : null) ||
+                 (item.diterbitkan ? item.diterbitkan.split('-')[0] : null) ||
+                 null;
+    
+    // Build data object, excluding undefined values
+    const data = {
       id: item.id,
-      title: item.title,
-      poster: item.poster || item.images || item.image,
-      rating: item.rating,
-      year: item.year,
+      title: item.title || item.name || 'Unknown',
+      poster: item.poster || item.poster_path || item.images || item.image || null,
+      rating: item.rating || item.vote_average || null,
+      year: year,
       type: type,
       addedAt: serverTimestamp()
-    });
+    };
+    
+    await setDoc(docRef, data);
     return { success: true };
   } catch (error) {
     console.error("Error adding to watchlist:", error);
