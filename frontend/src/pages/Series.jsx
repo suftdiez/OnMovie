@@ -4,6 +4,7 @@ import { getSeries, getPopularSeries, getRecentSeries, getTopRatedSeries } from 
 import { mockSeries } from '../data/mockData';
 import MovieCard from '../components/MovieCard';
 import Loading from '../components/Loading';
+import AnimatedSection, { AnimatedCard } from '../components/AnimatedSection';
 
 function Series() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -111,11 +112,15 @@ function Series() {
         {/* Series Grid */}
         {!loading && (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {series.map((item, index) => (
-                <MovieCard key={item.id || index} movie={item} type="series" />
-              ))}
-            </div>
+            <AnimatedSection animation="fade-up">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                {series.map((item, index) => (
+                  <AnimatedCard key={item.id || index} index={index}>
+                    <MovieCard movie={item} type="series" />
+                  </AnimatedCard>
+                ))}
+              </div>
+            </AnimatedSection>
 
             {/* Pagination */}
             {series.length > 0 && !usingMockData && (

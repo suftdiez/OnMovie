@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { searchMovies } from '../api';
 import MovieCard from '../components/MovieCard';
 import Loading from '../components/Loading';
+import { AnimatedCard } from '../components/AnimatedSection';
 
 function Search() {
   const [searchParams] = useSearchParams();
@@ -77,12 +78,13 @@ function Search() {
           <>
             {results.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                {results.map((item) => (
-                  <MovieCard 
-                    key={item.id} 
-                    movie={item} 
-                    type={item.type === 'series' ? 'series' : 'movie'} 
-                  />
+                {results.map((item, index) => (
+                  <AnimatedCard key={item.id} index={index}>
+                    <MovieCard 
+                      movie={item} 
+                      type={item.type === 'series' ? 'series' : 'movie'} 
+                    />
+                  </AnimatedCard>
                 ))}
               </div>
             ) : (

@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getPopularMovies, getRecentMovies, getPopularSeries, getTrendingMovies, getTrendingSeries } from '../api';
 import { mockMovies, mockSeries } from '../data/mockData';
-import Hero from '../components/Hero';
+import HeroCarousel from '../components/HeroCarousel';
 import MovieCard from '../components/MovieCard';
 import Loading from '../components/Loading';
+import AnimatedSection, { AnimatedCard } from '../components/AnimatedSection';
 
 function Home() {
   const [featuredMovie, setFeaturedMovie] = useState(null);
@@ -40,8 +41,8 @@ function Home() {
           setPopularMovies(popular.slice(0, 12));
           setRecentMovies(recent.slice(0, 12));
           setPopularSeries(series.slice(0, 12));
-          setTrendingMovies(trendingMov.slice(0, 6));
-          setTrendingSeries(trendingSer.slice(0, 6));
+          setTrendingMovies(trendingMov.slice(0, 18));
+          setTrendingSeries(trendingSer.slice(0, 18));
           
           // Use trending movie for featured if available
           if (trendingMov.length > 0) {
@@ -94,93 +95,109 @@ function Home() {
         </div>
       )}
 
-      {/* Hero Section */}
-      <Hero movie={featuredMovie} />
+      {/* Hero Carousel */}
+      <HeroCarousel movies={trendingMovies.slice(0, 5)} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-10">
         
-        {/* 🔥 Trending Movies Section */}
+        {/* Trending Movies Section */}
         {trendingMovies.length > 0 && (
+          <AnimatedSection animation="fade-up">
+            <section className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-white">Trending Movies</h2>
+                <Link to="/movies" className="text-accent hover:text-accent-hover transition">
+                  See All →
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                {trendingMovies.slice(0, 6).map((movie, index) => (
+                  <AnimatedCard key={movie.id || movie.slug || index} index={index}>
+                    <MovieCard movie={movie} type="movie" />
+                  </AnimatedCard>
+                ))}
+              </div>
+            </section>
+          </AnimatedSection>
+        )}
+
+        {/* Trending Series Section */}
+        {trendingSeries.length > 0 && (
+          <AnimatedSection animation="fade-up" delay={100}>
+            <section className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-white">Trending Series</h2>
+                <Link to="/series" className="text-accent hover:text-accent-hover transition">
+                  See All →
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                {trendingSeries.slice(0, 6).map((series, index) => (
+                  <AnimatedCard key={series.id || series.slug || index} index={index}>
+                    <MovieCard movie={series} type="series" />
+                  </AnimatedCard>
+                ))}
+              </div>
+            </section>
+          </AnimatedSection>
+        )}
+
+        {/* Popular Movies Section */}
+        <AnimatedSection animation="fade-up" delay={200}>
           <section className="mb-12">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                Trending Movies
-              </h2>
+              <h2 className="text-2xl font-bold text-white">Popular Movies</h2>
               <Link to="/movies" className="text-accent hover:text-accent-hover transition">
                 See All →
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {trendingMovies.map((movie, index) => (
-                <MovieCard key={movie.id || movie.slug || index} movie={movie} type="movie" />
+              {popularMovies.map((movie, index) => (
+                <AnimatedCard key={movie.id || movie.slug || index} index={index}>
+                  <MovieCard movie={movie} type="movie" />
+                </AnimatedCard>
               ))}
             </div>
           </section>
-        )}
+        </AnimatedSection>
 
-        {/* 🔥 Trending Series Section */}
-        {trendingSeries.length > 0 && (
+        {/* Recent Movies Section */}
+        <AnimatedSection animation="fade-up" delay={300}>
           <section className="mb-12">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                Trending Series
-              </h2>
+              <h2 className="text-2xl font-bold text-white">Now Playing</h2>
+              <Link to="/movies" className="text-accent hover:text-accent-hover transition">
+                See All →
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {recentMovies.map((movie, index) => (
+                <AnimatedCard key={movie.id || movie.slug || index} index={index}>
+                  <MovieCard movie={movie} type="movie" />
+                </AnimatedCard>
+              ))}
+            </div>
+          </section>
+        </AnimatedSection>
+
+        {/* Popular Series Section */}
+        <AnimatedSection animation="fade-up" delay={400}>
+          <section className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">Popular Series</h2>
               <Link to="/series" className="text-accent hover:text-accent-hover transition">
                 See All →
               </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {trendingSeries.map((series, index) => (
-                <MovieCard key={series.id || series.slug || index} movie={series} type="series" />
+              {popularSeries.map((series, index) => (
+                <AnimatedCard key={series.id || series.slug || index} index={index}>
+                  <MovieCard movie={series} type="series" />
+                </AnimatedCard>
               ))}
             </div>
           </section>
-        )}
-
-        {/* Popular Movies Section */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-white">Popular Movies</h2>
-            <Link to="/movies" className="text-accent hover:text-accent-hover transition">
-              See All →
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {popularMovies.map((movie, index) => (
-              <MovieCard key={movie.id || movie.slug || index} movie={movie} type="movie" />
-            ))}
-          </div>
-        </section>
-
-        {/* Recent Movies Section */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-white">Now Playing</h2>
-            <Link to="/movies" className="text-accent hover:text-accent-hover transition">
-              See All →
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {recentMovies.map((movie, index) => (
-              <MovieCard key={movie.id || movie.slug || index} movie={movie} type="movie" />
-            ))}
-          </div>
-        </section>
-
-        {/* Popular Series Section */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-white">Popular Series</h2>
-            <Link to="/series" className="text-accent hover:text-accent-hover transition">
-              See All →
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {popularSeries.map((series, index) => (
-              <MovieCard key={series.id || series.slug || index} movie={series} type="series" />
-            ))}
-          </div>
-        </section>
+        </AnimatedSection>
       </div>
     </div>
   );
