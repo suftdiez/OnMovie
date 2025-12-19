@@ -70,6 +70,30 @@ app.get("/movies/genres", async (_, res) => {
     }
 });
 
+// Search movies and series
+app.get("/search", async (req, res) => {
+    try {
+        const query = req.query.s || req.query.q || '';
+        const page = parseInt(req.query.page) || 1;
+        
+        if (!query.trim()) {
+            return res.json({ status: true, developers: Developers, data: [], results: [] });
+        }
+        
+        const data = await tmdb.searchMulti(query, page);
+        res.json({ 
+            status: true, 
+            developers: Developers, 
+            current_page: page, 
+            data: data.results,
+            results: data.results,
+            ...data 
+        });
+    } catch (err) {
+        res.status(500).json({ status: false, developers: Developers, message: err.message });
+    }
+});
+
 app.get("/movies/genre/:genre", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;

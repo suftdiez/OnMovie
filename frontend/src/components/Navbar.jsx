@@ -17,8 +17,8 @@ function Navbar() {
   ];
 
   const userLinks = [
-    { path: '/favorites', label: '❤️ Favorites' },
-    { path: '/watchlist', label: '📋 Watchlist' },
+    { path: '/favorites', label: 'Favorites' },
+    { path: '/watchlist', label: 'Watchlist' },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -100,7 +100,7 @@ function Navbar() {
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/5 transition"
                     >
-                      🚪 Logout
+                      Logout
                     </button>
                   </div>
                 )}
@@ -198,7 +198,7 @@ function Navbar() {
                     onClick={handleLogout}
                     className="text-sm text-red-400 py-2"
                   >
-                    🚪 Logout
+                    Logout
                   </button>
                 </div>
               </>

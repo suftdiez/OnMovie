@@ -22,7 +22,10 @@ function Search() {
         setLoading(true);
         setError(null);
         const response = await searchMovies(query);
-        const data = response.data?.data || response.data || [];
+        console.log('Search response:', response.data); // Debug log
+        
+        // Handle multiple possible response formats
+        const data = response.data?.results || response.data?.data || response.data || [];
         setResults(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Error searching:', err);

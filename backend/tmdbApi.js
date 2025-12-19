@@ -305,18 +305,46 @@ async function getPersonDetails(personId) {
     };
 }
 
+// Search for movies and series
+async function searchMulti(query, page = 1) {
+    const response = await tmdbApi.get("/search/multi", { 
+        params: { 
+            query,
+            page,
+            include_adult: false
+        } 
+    });
+    
+    // Filter and format results (only movies and tv shows)
+    const results = response.data.results
+        .filter(item => item.media_type === 'movie' || item.media_type === 'tv')
+        .map(item => {
+            if (item.media_type === 'movie') {
+                return { ...formatMovie(item), type: 'movie' };
+            } else {
+                return { ...formatSeries(item), type: 'series' };
+            }
+        });
+    
+    return {
+        results,
+        page: response.data.page,
+        total_pages: response.data.total_pages,
+        total_results: response.data.total_results
+    };
+}
+
 module.exports = {
     getPopularMovies,
     getLatestMovies,
     getTopRatedMovies,
     getMovieDetails,
-    searchMovies,
-    getGenres,
+    getMovieGenres: getGenres, // Renamed getGenres to getMovieGenres as per instruction's exports
     getMoviesByGenre,
     getPopularSeries,
-    getSeriesByGenre,
     getSeriesDetails,
     getSeriesGenres,
+    getSeriesByGenre,
     // New features
     getTrendingMovies,
     getTrendingSeries,
@@ -327,6 +355,7 @@ module.exports = {
     getMovieRecommendations,
     getSimilarSeries,
     getSeriesRecommendations,
-    getPersonDetails
+    getPersonDetails,
+    // Search
+    searchMulti
 };
-
