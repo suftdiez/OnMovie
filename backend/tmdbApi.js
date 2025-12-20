@@ -74,6 +74,20 @@ async function getMovieDetails(movieId) {
         params: { append_to_response: "videos,credits" }
     });
     const movie = response.data;
+    
+    // Fallback to English if synopsis is empty
+    let synopsis = movie.overview;
+    if (!synopsis || synopsis.trim() === '') {
+        try {
+            const enResponse = await tmdbApi.get(`/movie/${movieId}`, {
+                params: { language: 'en-US' }
+            });
+            synopsis = enResponse.data.overview || "No synopsis available";
+        } catch (e) {
+            synopsis = "No synopsis available";
+        }
+    }
+    
     return {
         id: movie.id,
         slug: movie.id.toString(),
@@ -84,7 +98,7 @@ async function getMovieDetails(movieId) {
         rating: movie.vote_average ? movie.vote_average.toFixed(1) : "N/A",
         country: movie.production_countries?.map(c => c.name).join(", ") || "N/A",
         genres: movie.genres?.map(g => g.name).join(", ") || "N/A",
-        synopsis: movie.overview || "No synopsis available",
+        synopsis: synopsis,
         diterbitkan: movie.release_date || "N/A",
         duration: movie.runtime ? `${movie.runtime} min` : "N/A",
         stream: movie.videos?.results?.filter(v => v.type === "Trailer").map(v => ({
@@ -151,6 +165,20 @@ async function getSeriesDetails(seriesId) {
         params: { append_to_response: "videos,credits" }
     });
     const series = response.data;
+    
+    // Fallback to English if synopsis is empty
+    let synopsis = series.overview;
+    if (!synopsis || synopsis.trim() === '') {
+        try {
+            const enResponse = await tmdbApi.get(`/tv/${seriesId}`, {
+                params: { language: 'en-US' }
+            });
+            synopsis = enResponse.data.overview || "No synopsis available";
+        } catch (e) {
+            synopsis = "No synopsis available";
+        }
+    }
+    
     return {
         id: series.id,
         slug: series.id.toString(),
@@ -161,7 +189,7 @@ async function getSeriesDetails(seriesId) {
         rating: series.vote_average ? series.vote_average.toFixed(1) : "N/A",
         country: series.production_countries?.map(c => c.name).join(", ") || "N/A",
         genres: series.genres?.map(g => g.name).join(", ") || "N/A",
-        synopsis: series.overview || "No synopsis available",
+        synopsis: synopsis,
         diterbitkan: series.first_air_date || "N/A",
         seasons: series.number_of_seasons,
         episodes: series.number_of_episodes,
@@ -334,12 +362,76 @@ async function searchMulti(query, page = 1) {
     };
 }
 
+// Get movie videos (trailers, teasers, etc.)
+async function getMovieVideos(movieId) {
+    // Use English language for videos since most trailers are in English
+    const response = await tmdbApi.get(`/movie/${movieId}/videos`, {
+        params: { language: 'en-US' }
+    });
+    const videos = response.data.results || [];
+    
+    // Filter for YouTube videos and prioritize trailers
+    const youtubeVideos = videos.filter(v => v.site === 'YouTube');
+    const trailers = youtubeVideos.filter(v => v.type === 'Trailer');
+    const teasers = youtubeVideos.filter(v => v.type === 'Teaser');
+    const clips = youtubeVideos.filter(v => v.type === 'Clip');
+    
+    // Return sorted: trailers first, then teasers, then clips
+    const sortedVideos = [...trailers, ...teasers, ...clips, ...youtubeVideos.filter(v => 
+        v.type !== 'Trailer' && v.type !== 'Teaser' && v.type !== 'Clip'
+    )];
+    
+    return {
+        videos: sortedVideos.map(video => ({
+            id: video.id,
+            key: video.key,
+            name: video.name,
+            type: video.type,
+            site: video.site,
+            official: video.official,
+            url: `https://www.youtube.com/embed/${video.key}`
+        }))
+    };
+}
+
+// Get series videos (trailers, teasers, etc.)
+async function getSeriesVideos(seriesId) {
+    // Use English language for videos since most trailers are in English
+    const response = await tmdbApi.get(`/tv/${seriesId}/videos`, {
+        params: { language: 'en-US' }
+    });
+    const videos = response.data.results || [];
+    
+    // Filter for YouTube videos and prioritize trailers
+    const youtubeVideos = videos.filter(v => v.site === 'YouTube');
+    const trailers = youtubeVideos.filter(v => v.type === 'Trailer');
+    const teasers = youtubeVideos.filter(v => v.type === 'Teaser');
+    const clips = youtubeVideos.filter(v => v.type === 'Clip');
+    
+    // Return sorted: trailers first, then teasers, then clips
+    const sortedVideos = [...trailers, ...teasers, ...clips, ...youtubeVideos.filter(v => 
+        v.type !== 'Trailer' && v.type !== 'Teaser' && v.type !== 'Clip'
+    )];
+    
+    return {
+        videos: sortedVideos.map(video => ({
+            id: video.id,
+            key: video.key,
+            name: video.name,
+            type: video.type,
+            site: video.site,
+            official: video.official,
+            url: `https://www.youtube.com/embed/${video.key}`
+        }))
+    };
+}
+
 module.exports = {
     getPopularMovies,
     getLatestMovies,
     getTopRatedMovies,
     getMovieDetails,
-    getMovieGenres: getGenres, // Renamed getGenres to getMovieGenres as per instruction's exports
+    getMovieGenres: getGenres,
     getMoviesByGenre,
     getPopularSeries,
     getSeriesDetails,
@@ -357,5 +449,8 @@ module.exports = {
     getSeriesRecommendations,
     getPersonDetails,
     // Search
-    searchMulti
+    searchMulti,
+    // Videos / Trailers
+    getMovieVideos,
+    getSeriesVideos
 };

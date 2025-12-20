@@ -104,6 +104,16 @@ app.get("/movies/genre/:genre", async (req, res) => {
     }
 });
 
+// Movie Videos/Trailers
+app.get("/movies/:id/videos", async (req, res) => {
+    try {
+        const data = await tmdb.getMovieVideos(req.params.id);
+        res.json({ status: true, developers: Developers, ...data });
+    } catch (err) {
+        res.status(500).json({ status: false, developers: Developers, message: err.message });
+    }
+});
+
 app.get("/movies/:id/stream", async (req, res) => {
     try {
         const movie = await tmdb.getMovieDetails(req.params.id);
@@ -178,6 +188,16 @@ app.get("/series/:id/", async (req, res) => {
             return res.status(404).json({ status: false, developers: Developers, message: "Series not found" });
         }
         res.json({ status: true, developers: Developers, result: series });
+    } catch (err) {
+        res.status(500).json({ status: false, developers: Developers, message: err.message });
+    }
+});
+
+// Series Videos/Trailers
+app.get("/series/:id/videos", async (req, res) => {
+    try {
+        const data = await tmdb.getSeriesVideos(req.params.id);
+        res.json({ status: true, developers: Developers, ...data });
     } catch (err) {
         res.status(500).json({ status: false, developers: Developers, message: err.message });
     }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
-import { getMovieStreams, getSeriesStreams, getMovieDetails, getSeriesDetails } from '../api';
+import { getMovieDetails, getSeriesDetails, getMovieVideos, getSeriesVideos } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { addToHistory } from '../firebase/firestore';
 import Loading from '../components/Loading';
@@ -9,11 +9,11 @@ function Watch() {
   const { type, id } = useParams();
   const [searchParams] = useSearchParams();
   const { user, isAuthenticated } = useAuth();
-  const [streams, setStreams] = useState([]);
+  const [videos, setVideos] = useState([]);
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedQuality, setSelectedQuality] = useState(null);
+  const [selectedVideo, setSelectedVideo] = useState(null);
   
   // For series
   const season = parseInt(searchParams.get('season')) || 1;
@@ -32,19 +32,20 @@ function Watch() {
           : await getSeriesDetails(id);
         setItem(detailsRes.data?.data || detailsRes.data);
         
-        // Fetch streams
-        const streamsRes = isMovie
-          ? await getMovieStreams(id)
-          : await getSeriesStreams(id, season, episode);
+        // Fetch videos/trailers
+        const videosRes = isMovie
+          ? await getMovieVideos(id)
+          : await getSeriesVideos(id);
         
-        const streamData = streamsRes.data?.data || streamsRes.data || [];
-        setStreams(Array.isArray(streamData) ? streamData : [streamData]);
+        const videoData = videosRes.data?.videos || [];
+        setVideos(videoData);
         
-        if (streamData.length > 0) {
-          setSelectedQuality(streamData[0]);
+        // Select first trailer by default
+        if (videoData.length > 0) {
+          setSelectedVideo(videoData[0]);
         }
       } catch (err) {
-        console.error('Error fetching streams:', err);
+        console.error('Error fetching videos:', err);
         setError('Failed to load video. Please try again later.');
       } finally {
         setLoading(false);
@@ -114,12 +115,13 @@ function Watch() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Video Player Area */}
         <div className="bg-black rounded-lg overflow-hidden aspect-video mb-8">
-          {selectedQuality?.url || selectedQuality?.link ? (
+          {selectedVideo?.url ? (
             <iframe
-              src={selectedQuality.url || selectedQuality.link}
+              src={selectedVideo.url}
               className="w-full h-full"
               allowFullScreen
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              title={selectedVideo.name || 'Trailer'}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -127,7 +129,7 @@ function Watch() {
                 <svg className="w-16 h-16 text-text-secondary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
-                <p className="text-text-secondary">No streaming source available</p>
+                <p className="text-text-secondary">No trailer available for this {isMovie ? 'movie' : 'series'}</p>
               </div>
             </div>
           )}
@@ -138,8 +140,20 @@ function Watch() {
           {/* Main Info */}
           <div className="flex-1">
             <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
-              {item?.title}
+              {item?.result?.title || item?.title || 'Loading...'}
             </h1>
+            
+            {/* Current Video Info */}
+            {selectedVideo && (
+              <div className="flex items-center gap-2 mb-4">
+                <span className="bg-red-600 text-white text-xs px-2 py-1 rounded">
+                  {selectedVideo.type || 'Video'}
+                </span>
+                <span className="text-text-secondary text-sm">
+                  {selectedVideo.name}
+                </span>
+              </div>
+            )}
             
             {!isMovie && (
               <p className="text-accent mb-4">
@@ -148,38 +162,52 @@ function Watch() {
             )}
             
             <div className="flex flex-wrap items-center gap-4 text-text-secondary mb-6">
-              {item?.rating && (
+              {(item?.result?.rating || item?.rating) && (
                 <span className="flex items-center gap-1">
                   <span className="text-yellow-400">⭐</span>
-                  {item.rating}
+                  {item?.result?.rating || item?.rating}
                 </span>
               )}
-              {item?.year && <span>{item.year}</span>}
-              {item?.duration && <span>{item.duration}</span>}
+              {(item?.result?.year || item?.year) && <span>{item?.result?.year || item?.year}</span>}
+              {(item?.result?.duration || item?.duration) && <span>{item?.result?.duration || item?.duration}</span>}
             </div>
 
-            {item?.synopsis && (
-              <p className="text-text-secondary">{item.synopsis}</p>
+            {(item?.result?.synopsis || item?.synopsis) && (
+              <p className="text-text-secondary">{item?.result?.synopsis || item?.synopsis}</p>
             )}
           </div>
 
-          {/* Quality Selection */}
-          <div className="lg:w-72">
-            <h3 className="text-lg font-semibold text-white mb-4">Server / Quality</h3>
-            <div className="flex flex-wrap gap-2">
-              {streams.map((stream, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedQuality(stream)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    selectedQuality === stream
-                      ? 'bg-accent text-white'
-                      : 'bg-tertiary text-text-secondary hover:text-white'
-                  }`}
-                >
-                  {stream.quality || stream.server || `Server ${index + 1}`}
-                </button>
-              ))}
+          {/* Video Selection */}
+          <div className="lg:w-80">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Available Videos ({videos.length})
+            </h3>
+            <div className="flex flex-col gap-2 max-h-64 overflow-y-auto">
+              {videos.length > 0 ? (
+                videos.map((video, index) => (
+                  <button
+                    key={video.id || index}
+                    onClick={() => setSelectedVideo(video)}
+                    className={`text-left px-4 py-3 rounded-lg font-medium transition-colors ${
+                      selectedVideo === video
+                        ? 'bg-accent text-white'
+                        : 'bg-tertiary text-text-secondary hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs px-2 py-0.5 rounded ${
+                        video.type === 'Trailer' ? 'bg-red-600' : 
+                        video.type === 'Teaser' ? 'bg-orange-600' : 'bg-blue-600'
+                      } text-white`}>
+                        {video.type}
+                      </span>
+                      <span className="truncate">{video.name}</span>
+                    </div>
+                  </button>
+                ))
+              ) : (
+                <p className="text-text-secondary text-sm">No videos available</p>
+              )}
             </div>
 
             {/* Back Button */}

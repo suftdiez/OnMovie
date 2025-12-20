@@ -54,4 +54,8 @@ export const getSeriesRecommendations = (id) => api.get(`/series/${id}/recommend
 // Person
 export const getPersonDetails = (id) => api.get(`/person/${id}`);
 
+// Videos / Trailers
+export const getMovieVideos = (id) => api.get(`/movies/${id}/videos`);
+export const getSeriesVideos = (id) => api.get(`/series/${id}/videos`);
+
 export default api;
