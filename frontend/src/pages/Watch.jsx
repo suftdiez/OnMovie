@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { getMovieStreams, getSeriesStreams, getMovieDetails, getSeriesDetails } from '../api';
+import { useAuth } from '../context/AuthContext';
+import { addToHistory } from '../firebase/firestore';
 import Loading from '../components/Loading';
 
 function Watch() {
   const { type, id } = useParams();
   const [searchParams] = useSearchParams();
+  const { user, isAuthenticated } = useAuth();
   const [streams, setStreams] = useState([]);
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -50,6 +53,36 @@ function Watch() {
 
     fetchData();
   }, [id, isMovie, season, episode]);
+
+  // Auto-save to watch history when item loads
+  useEffect(() => {
+    const saveToHistory = async () => {
+      if (isAuthenticated && user && item) {
+        // API returns {developers, result, status} - actual data is in "result"
+        const data = item.result || item;
+        
+        console.log('Data to save:', data); // Debug
+        
+        const historyItem = {
+          id: id,
+          title: data.title || data.name || 'Unknown',
+          poster: data.image || data.poster || data.backdrop || data.poster_path || null,
+          rating: data.rating || data.vote_average || null,
+          year: data.year || 
+                (data.diterbitkan ? data.diterbitkan.split('-')[0] : null) ||
+                (data.release_date ? data.release_date.split('-')[0] : null) || 
+                (data.first_air_date ? data.first_air_date.split('-')[0] : null) ||
+                null
+        };
+        
+        console.log('Saving to history:', historyItem);
+        const result = await addToHistory(user.uid, historyItem, isMovie ? 'movie' : 'series');
+        console.log('History save result:', result);
+      }
+    };
+    
+    saveToHistory();
+  }, [item, isAuthenticated, user, isMovie, id]);
 
   if (loading) {
     return (

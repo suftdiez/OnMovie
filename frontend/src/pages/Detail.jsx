@@ -7,6 +7,7 @@ import { addToFavorites, removeFromFavorites, isInFavorites, addToWatchlist, rem
 import Loading from '../components/Loading';
 import CastCard from '../components/CastCard';
 import MovieCard from '../components/MovieCard';
+import ReviewSection from '../components/ReviewSection';
 
 function Detail() {
   const { type, id } = useParams();
@@ -388,6 +389,13 @@ function Detail() {
             </div>
           </section>
         )}
+
+        {/* User Reviews Section */}
+        <ReviewSection 
+          itemId={id} 
+          itemTitle={item?.title || item?.name || 'Unknown'} 
+          type={contentType} 
+        />
       </div>
     </div>
   );

@@ -19,6 +19,7 @@ function Navbar() {
   const userLinks = [
     { path: '/favorites', label: 'Favorites' },
     { path: '/watchlist', label: 'Watchlist' },
+    { path: '/history', label: 'History' },
   ];
 
   const isActive = (path) => location.pathname === path;

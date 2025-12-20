@@ -11,6 +11,7 @@ import Search from './pages/Search';
 import Genres from './pages/Genres';
 import Favorites from './pages/Favorites';
 import Watchlist from './pages/Watchlist';
+import History from './pages/History';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
               <Route path="/genres/:genre" element={<Movies />} />
               <Route path="/favorites" element={<Favorites />} />
               <Route path="/watchlist" element={<Watchlist />} />
+              <Route path="/history" element={<History />} />
             </Routes>
           </main>
           <Footer />
