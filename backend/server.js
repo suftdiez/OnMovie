@@ -169,6 +169,36 @@ app.get("/series/popular", async (req, res) => {
     }
 });
 
+app.get("/series/latest", async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const data = await tmdb.getLatestSeries(page);
+        res.json({ status: true, developers: Developers, current_page: page, ...data });
+    } catch (err) {
+        res.status(500).json({ status: false, developers: Developers, message: err.message });
+    }
+});
+
+app.get("/series/top-rated", async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const data = await tmdb.getTopRatedSeries(page);
+        res.json({ status: true, developers: Developers, current_page: page, ...data });
+    } catch (err) {
+        res.status(500).json({ status: false, developers: Developers, message: err.message });
+    }
+});
+
+app.get("/series/airing-today", async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const data = await tmdb.getAiringTodaySeries(page);
+        res.json({ status: true, developers: Developers, current_page: page, ...data });
+    } catch (err) {
+        res.status(500).json({ status: false, developers: Developers, message: err.message });
+    }
+});
+
 app.get("/series/:id/stream", async (req, res) => {
     try {
         const series = await tmdb.getSeriesDetails(req.params.id);

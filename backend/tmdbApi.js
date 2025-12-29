@@ -146,6 +146,35 @@ async function getPopularSeries(page = 1) {
     const response = await tmdbApi.get("/tv/popular", { params: { page } });
     return {
         total_pages: response.data.total_pages,
+        data: response.data.results.map(formatSeries),
+        series: response.data.results.map(formatSeries)
+    };
+}
+
+async function getLatestSeries(page = 1) {
+    // Use on_the_air for latest airing series
+    const response = await tmdbApi.get("/tv/on_the_air", { params: { page } });
+    return {
+        total_pages: response.data.total_pages,
+        data: response.data.results.map(formatSeries),
+        series: response.data.results.map(formatSeries)
+    };
+}
+
+async function getTopRatedSeries(page = 1) {
+    const response = await tmdbApi.get("/tv/top_rated", { params: { page } });
+    return {
+        total_pages: response.data.total_pages,
+        data: response.data.results.map(formatSeries),
+        series: response.data.results.map(formatSeries)
+    };
+}
+
+async function getAiringTodaySeries(page = 1) {
+    const response = await tmdbApi.get("/tv/airing_today", { params: { page } });
+    return {
+        total_pages: response.data.total_pages,
+        data: response.data.results.map(formatSeries),
         series: response.data.results.map(formatSeries)
     };
 }
@@ -156,6 +185,7 @@ async function getSeriesByGenre(genreId, page = 1) {
     });
     return {
         total_pages: response.data.total_pages,
+        data: response.data.results.map(formatSeries),
         series: response.data.results.map(formatSeries)
     };
 }
@@ -452,5 +482,9 @@ module.exports = {
     searchMulti,
     // Videos / Trailers
     getMovieVideos,
-    getSeriesVideos
+    getSeriesVideos,
+    // Series filters
+    getLatestSeries,
+    getTopRatedSeries,
+    getAiringTodaySeries
 };

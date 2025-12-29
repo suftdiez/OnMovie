@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { getMovies, getPopularMovies, getRecentMovies, getTopRatedMovies } from '../api';
+import { useSearchParams, useParams } from 'react-router-dom';
+import { getMovies, getPopularMovies, getRecentMovies, getTopRatedMovies, getMoviesByGenre } from '../api';
 import { mockMovies } from '../data/mockData';
 import MovieCard from '../components/MovieCard';
 import Loading from '../components/Loading';
 import AnimatedSection, { AnimatedCard } from '../components/AnimatedSection';
 
 function Movies() {
+  const { genre: genreId } = useParams(); // Get genre from URL if on /genres/:genre route
   const [searchParams, setSearchParams] = useSearchParams();
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,6 +15,16 @@ function Movies() {
   const [page, setPage] = useState(parseInt(searchParams.get('page')) || 1);
   const [filter, setFilter] = useState(searchParams.get('filter') || 'latest');
   const [totalPages, setTotalPages] = useState(1);
+  const [genreName, setGenreName] = useState('');
+
+  // Genre ID to name mapping
+  const genreNames = {
+    28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy',
+    80: 'Crime', 99: 'Documentary', 18: 'Drama', 10751: 'Family',
+    14: 'Fantasy', 36: 'History', 27: 'Horror', 10402: 'Music',
+    9648: 'Mystery', 10749: 'Romance', 878: 'Science Fiction',
+    53: 'Thriller', 10752: 'War', 37: 'Western'
+  };
 
   const filters = [
     { value: 'latest', label: 'Latest' },
@@ -28,18 +39,25 @@ function Movies() {
         setLoading(true);
         let response;
         
-        switch (filter) {
-          case 'popular':
-            response = await getPopularMovies(page);
-            break;
-          case 'recent':
-            response = await getRecentMovies(page);
-            break;
-          case 'top-rated':
-            response = await getTopRatedMovies(page);
-            break;
-          default:
-            response = await getMovies(page);
+        // If we have a genreId, fetch movies by genre
+        if (genreId) {
+          response = await getMoviesByGenre(genreId, page);
+          setGenreName(genreNames[parseInt(genreId)] || `Genre ${genreId}`);
+        } else {
+          // Otherwise use filter
+          switch (filter) {
+            case 'popular':
+              response = await getPopularMovies(page);
+              break;
+            case 'recent':
+              response = await getRecentMovies(page);
+              break;
+            case 'top-rated':
+              response = await getTopRatedMovies(page);
+              break;
+            default:
+              response = await getMovies(page);
+          }
         }
 
         // Handle new API response format
@@ -64,7 +82,7 @@ function Movies() {
     };
 
     fetchMovies();
-  }, [page, filter]);
+  }, [page, filter, genreId]);
 
   const handleFilterChange = (newFilter) => {
     setFilter(newFilter);
@@ -90,24 +108,28 @@ function Movies() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-4">Movies</h1>
+          <h1 className="text-3xl font-bold text-white mb-4">
+            {genreId ? `${genreName} Movies` : 'Movies'}
+          </h1>
           
-          {/* Filter Tabs */}
-          <div className="flex flex-wrap gap-2">
-            {filters.map((f) => (
-              <button
-                key={f.value}
-                onClick={() => handleFilterChange(f.value)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  filter === f.value
-                    ? 'bg-accent text-white'
-                    : 'bg-tertiary text-text-secondary hover:text-white'
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
+          {/* Filter Tabs - Only show when not filtering by genre */}
+          {!genreId && (
+            <div className="flex flex-wrap gap-2">
+              {filters.map((f) => (
+                <button
+                  key={f.value}
+                  onClick={() => handleFilterChange(f.value)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    filter === f.value
+                      ? 'bg-accent text-white'
+                      : 'bg-tertiary text-text-secondary hover:text-white'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Loading State */}

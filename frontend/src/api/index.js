@@ -17,10 +17,10 @@ export const getMovieDetails = (id) => api.get(`/movies/${id}/stream`);
 export const getMovieStreams = (id) => api.get(`/movies/${id}/stream`);
 
 // Series
-export const getSeries = (page = 1) => api.get(`/series/popular?page=${page}`);
+export const getSeries = (page = 1) => api.get(`/series/latest?page=${page}`);
 export const getPopularSeries = (page = 1) => api.get(`/series/popular?page=${page}`);
-export const getRecentSeries = (page = 1) => api.get(`/series/popular?page=${page}`);
-export const getTopRatedSeries = (page = 1) => api.get(`/series/popular?page=${page}`);
+export const getRecentSeries = (page = 1) => api.get(`/series/airing-today?page=${page}`);
+export const getTopRatedSeries = (page = 1) => api.get(`/series/top-rated?page=${page}`);
 export const getSeriesDetails = (id) => api.get(`/series/${id}/stream`);
 export const getSeriesStreams = (id) => api.get(`/series/${id}/stream`);
 
