@@ -16,6 +16,7 @@ import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
 import CustomLists from './pages/CustomLists';
 import ListDetail from './pages/ListDetail';
+import Person from './pages/Person';
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
               <Route path="/profile/edit" element={<EditProfile />} />
               <Route path="/lists" element={<CustomLists />} />
               <Route path="/lists/:listId" element={<ListDetail />} />
+              <Route path="/person/:id" element={<Person />} />
             </Routes>
           </main>
           <Footer />

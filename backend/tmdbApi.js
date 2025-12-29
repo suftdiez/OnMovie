@@ -61,6 +61,15 @@ async function getLatestMovies(page = 1) {
     };
 }
 
+async function getNowPlayingMovies(page = 1) {
+    const response = await tmdbApi.get("/movie/now_playing", { params: { page } });
+    return {
+        total_pages: response.data.total_pages,
+        data: response.data.results.map(formatMovie),
+        movies: response.data.results.map(formatMovie)
+    };
+}
+
 async function getTopRatedMovies(page = 1) {
     const response = await tmdbApi.get("/movie/top_rated", { params: { page } });
     return {
@@ -486,5 +495,7 @@ module.exports = {
     // Series filters
     getLatestSeries,
     getTopRatedSeries,
-    getAiringTodaySeries
+    getAiringTodaySeries,
+    // Now Playing
+    getNowPlayingMovies
 };

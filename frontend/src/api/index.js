@@ -13,6 +13,7 @@ export const getPopularMovies = (page = 1) => api.get(`/movies/popular?page=${pa
 export const getRecentMovies = (page = 1) => api.get(`/movies/latest?page=${page}`);
 export const getTopRatedMovies = (page = 1) => api.get(`/movies/top-rated?page=${page}`);
 export const getUpcomingMovies = (page = 1) => api.get(`/movies/upcoming?page=${page}`);
+export const getNowPlayingMovies = (page = 1) => api.get(`/movies/now-playing?page=${page}`);
 export const getMovieDetails = (id) => api.get(`/movies/${id}/stream`);
 export const getMovieStreams = (id) => api.get(`/movies/${id}/stream`);
 

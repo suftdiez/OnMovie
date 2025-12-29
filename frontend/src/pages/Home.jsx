@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getPopularMovies, getRecentMovies, getPopularSeries, getTrendingMovies, getTrendingSeries } from '../api';
+import { getPopularMovies, getRecentMovies, getPopularSeries, getTrendingMovies, getTrendingSeries, getNowPlayingMovies } from '../api';
 import { mockMovies, mockSeries } from '../data/mockData';
 import HeroCarousel from '../components/HeroCarousel';
 import MovieCard from '../components/MovieCard';
@@ -14,6 +14,7 @@ function Home() {
   const [popularMovies, setPopularMovies] = useState([]);
   const [recentMovies, setRecentMovies] = useState([]);
   const [popularSeries, setPopularSeries] = useState([]);
+  const [nowPlayingMovies, setNowPlayingMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [usingMockData, setUsingMockData] = useState(false);
 
@@ -21,12 +22,13 @@ function Home() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [popularRes, recentRes, seriesRes, trendingMoviesRes, trendingSeriesRes] = await Promise.all([
+        const [popularRes, recentRes, seriesRes, trendingMoviesRes, trendingSeriesRes, nowPlayingRes] = await Promise.all([
           getPopularMovies(),
           getRecentMovies(),
           getPopularSeries(),
           getTrendingMovies('day'),
           getTrendingSeries('day'),
+          getNowPlayingMovies(),
         ]);
 
         // Handle API response format
@@ -35,6 +37,7 @@ function Home() {
         const series = seriesRes.data?.series || seriesRes.data?.results || [];
         const trendingMov = trendingMoviesRes.data?.movies || trendingMoviesRes.data?.results || [];
         const trendingSer = trendingSeriesRes.data?.series || trendingSeriesRes.data?.results || [];
+        const nowPlaying = nowPlayingRes.data?.movies || nowPlayingRes.data?.data || nowPlayingRes.data?.results || [];
 
         // Check if we got valid data
         if (popular.length > 0 || recent.length > 0 || series.length > 0) {
@@ -43,6 +46,7 @@ function Home() {
           setPopularSeries(series.slice(0, 12));
           setTrendingMovies(trendingMov.slice(0, 18));
           setTrendingSeries(trendingSer.slice(0, 18));
+          setNowPlayingMovies(nowPlaying.slice(0, 6));
           
           // Use trending movie for featured if available
           if (trendingMov.length > 0) {
@@ -99,6 +103,40 @@ function Home() {
       <HeroCarousel movies={trendingMovies.slice(0, 5)} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-10">
+
+        {/* Now Playing / In Theaters Section */}
+        {nowPlayingMovies.length > 0 && (
+          <AnimatedSection animation="fade-up">
+            <section className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Now Playing</h2>
+                  <p className="text-text-secondary text-sm">In theaters now</p>
+                </div>
+                <Link 
+                  to="/movies" 
+                  className="bg-accent hover:bg-accent-hover text-white px-4 py-2 rounded-lg transition flex items-center gap-2"
+                >
+                  <span>View All</span>
+                  <span>→</span>
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                {nowPlayingMovies.map((movie, index) => (
+                  <AnimatedCard key={movie.id || movie.slug || index} index={index}>
+                    <div className="relative">
+                      <MovieCard movie={movie} type="movie" />
+                      <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                        <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                        NOW
+                      </div>
+                    </div>
+                  </AnimatedCard>
+                ))}
+              </div>
+            </section>
+          </AnimatedSection>
+        )}
         
         {/* Trending Movies Section */}
         {trendingMovies.length > 0 && (
@@ -161,24 +199,7 @@ function Home() {
           </section>
         </AnimatedSection>
 
-        {/* Recent Movies Section */}
-        <AnimatedSection animation="fade-up" delay={300}>
-          <section className="mb-12">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-white">Now Playing</h2>
-              <Link to="/movies" className="text-accent hover:text-accent-hover transition">
-                See All →
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {recentMovies.map((movie, index) => (
-                <AnimatedCard key={movie.id || movie.slug || index} index={index}>
-                  <MovieCard movie={movie} type="movie" />
-                </AnimatedCard>
-              ))}
-            </div>
-          </section>
-        </AnimatedSection>
+
 
         {/* Popular Series Section */}
         <AnimatedSection animation="fade-up" delay={400}>
