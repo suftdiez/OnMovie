@@ -17,6 +17,8 @@ function Navbar() {
   ];
 
   const userLinks = [
+    { path: '/profile', label: 'Profile' },
+    { path: '/lists', label: 'My Lists' },
     { path: '/favorites', label: 'Favorites' },
     { path: '/watchlist', label: 'Watchlist' },
     { path: '/history', label: 'History' },

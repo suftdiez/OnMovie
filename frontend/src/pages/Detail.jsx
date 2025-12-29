@@ -8,6 +8,7 @@ import Loading from '../components/Loading';
 import CastCard from '../components/CastCard';
 import MovieCard from '../components/MovieCard';
 import ReviewSection from '../components/ReviewSection';
+import AddToListModal from '../components/AddToListModal';
 
 function Detail() {
   const { type, id } = useParams();
@@ -22,6 +23,7 @@ function Detail() {
   const [usingMockData, setUsingMockData] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isWatchlisted, setIsWatchlisted] = useState(false);
+  const [showListModal, setShowListModal] = useState(false);
 
   // Determine type from URL
   const isMovie = type === 'movie' || window.location.pathname.startsWith('/movie/');
@@ -322,6 +324,19 @@ function Detail() {
                 </svg>
                 {isWatchlisted ? 'In Watchlist' : 'Watchlist'}
               </button>
+
+              {/* Add to List Button */}
+              {isAuthenticated && (
+                <button
+                  onClick={() => setShowListModal(true)}
+                  className="inline-flex items-center gap-2 font-semibold px-6 py-3 rounded-lg transition-colors bg-white/10 hover:bg-white/20 text-white"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                  Add to List
+                </button>
+              )}
             </div>
 
             {/* Additional Info */}
@@ -397,6 +412,14 @@ function Detail() {
           type={contentType} 
         />
       </div>
+
+      {/* Add to List Modal */}
+      <AddToListModal
+        isOpen={showListModal}
+        onClose={() => setShowListModal(false)}
+        item={item}
+        type={contentType}
+      />
     </div>
   );
 }

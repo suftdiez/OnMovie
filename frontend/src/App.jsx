@@ -12,6 +12,10 @@ import Genres from './pages/Genres';
 import Favorites from './pages/Favorites';
 import Watchlist from './pages/Watchlist';
 import History from './pages/History';
+import Profile from './pages/Profile';
+import EditProfile from './pages/EditProfile';
+import CustomLists from './pages/CustomLists';
+import ListDetail from './pages/ListDetail';
 
 function App() {
   return (
@@ -34,6 +38,10 @@ function App() {
               <Route path="/favorites" element={<Favorites />} />
               <Route path="/watchlist" element={<Watchlist />} />
               <Route path="/history" element={<History />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/edit" element={<EditProfile />} />
+              <Route path="/lists" element={<CustomLists />} />
+              <Route path="/lists/:listId" element={<ListDetail />} />
             </Routes>
           </main>
           <Footer />

@@ -5,7 +5,10 @@ import {
   getReviews, 
   getUserReview, 
   updateReview, 
-  deleteReview 
+  deleteReview,
+  likeReview,
+  unlikeReview,
+  getItemReviewLikes
 } from '../firebase/firestore';
 
 function ReviewSection({ itemId, itemTitle, type = 'movie' }) {
@@ -18,6 +21,8 @@ function ReviewSection({ itemId, itemTitle, type = 'movie' }) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [hoverRating, setHoverRating] = useState(0);
+  const [likesData, setLikesData] = useState({});
+  const [likingReview, setLikingReview] = useState(null);
 
   // Fetch reviews on mount
   useEffect(() => {
@@ -35,6 +40,11 @@ function ReviewSection({ itemId, itemTitle, type = 'movie' }) {
     setLoading(true);
     const data = await getReviews(itemId, type);
     setReviews(data);
+    
+    // Fetch likes data
+    const likes = await getItemReviewLikes(itemId, type);
+    setLikesData(likes);
+    
     setLoading(false);
   };
 
@@ -91,6 +101,43 @@ function ReviewSection({ itemId, itemTitle, type = 'movie' }) {
     }
     
     setSubmitting(false);
+  };
+
+  const handleLikeReview = async (review) => {
+    if (!isAuthenticated) return;
+    
+    const reviewId = review.docId;
+    const hasLiked = likesData[reviewId]?.likers?.includes(user.uid);
+    
+    setLikingReview(reviewId);
+    
+    if (hasLiked) {
+      // Unlike
+      const result = await unlikeReview(reviewId, user.uid);
+      if (result.success) {
+        setLikesData(prev => ({
+          ...prev,
+          [reviewId]: {
+            count: Math.max(0, (prev[reviewId]?.count || 1) - 1),
+            likers: (prev[reviewId]?.likers || []).filter(id => id !== user.uid)
+          }
+        }));
+      }
+    } else {
+      // Like
+      const result = await likeReview(reviewId, itemId, type, user.uid, review.userId);
+      if (result.success) {
+        setLikesData(prev => ({
+          ...prev,
+          [reviewId]: {
+            count: (prev[reviewId]?.count || 0) + 1,
+            likers: [...(prev[reviewId]?.likers || []), user.uid]
+          }
+        }));
+      }
+    }
+    
+    setLikingReview(null);
   };
 
   const StarRating = ({ rating, onRate, interactive = false, size = 'md' }) => {
@@ -259,43 +306,87 @@ function ReviewSection({ itemId, itemTitle, type = 'movie' }) {
         </div>
       ) : (
         <div className="space-y-4">
-          {reviews.map((review) => (
-            <div 
-              key={review.docId} 
-              className="bg-secondary/50 rounded-xl p-5 border border-white/5"
-            >
-              <div className="flex items-start gap-4">
-                {review.userPhoto ? (
-                  <img 
-                    src={review.userPhoto} 
-                    alt={review.userName} 
-                    className="w-12 h-12 rounded-full"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center text-white font-bold">
-                    {review.userName?.charAt(0).toUpperCase() || 'A'}
-                  </div>
-                )}
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <span className="text-white font-medium">{review.userName}</span>
-                      <span className="text-text-secondary text-sm ml-2">
-                        {review.createdAt?.toDate?.()?.toLocaleDateString?.() || 'Recently'}
-                      </span>
+          {reviews.map((review) => {
+            const likeCount = likesData[review.docId]?.count || 0;
+            const hasLiked = likesData[review.docId]?.likers?.includes(user?.uid);
+            const isLiking = likingReview === review.docId;
+            
+            return (
+              <div 
+                key={review.docId} 
+                className="bg-secondary/50 rounded-xl p-5 border border-white/5"
+              >
+                <div className="flex items-start gap-4">
+                  {review.userPhoto ? (
+                    <img 
+                      src={review.userPhoto} 
+                      alt={review.userName} 
+                      className="w-12 h-12 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center text-white font-bold">
+                      {review.userName?.charAt(0).toUpperCase() || 'A'}
                     </div>
-                    <div className="flex items-center gap-1 bg-yellow-500/20 px-3 py-1 rounded-full">
-                      <span className="text-yellow-400">⭐</span>
-                      <span className="text-white font-bold">{review.rating}/10</span>
-                    </div>
-                  </div>
-                  {review.review && (
-                    <p className="text-text-secondary">{review.review}</p>
                   )}
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <span className="text-white font-medium">{review.userName}</span>
+                        <span className="text-text-secondary text-sm ml-2">
+                          {review.createdAt?.toDate?.()?.toLocaleDateString?.() || 'Recently'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 bg-yellow-500/20 px-3 py-1 rounded-full">
+                        <span className="text-yellow-400">⭐</span>
+                        <span className="text-white font-bold">{review.rating}/10</span>
+                      </div>
+                    </div>
+                    {review.review && (
+                      <p className="text-text-secondary mb-3">{review.review}</p>
+                    )}
+                    
+                    {/* Like Button */}
+                    <div className="flex items-center gap-4 mt-3 pt-3 border-t border-white/5">
+                      <button
+                        onClick={() => handleLikeReview(review)}
+                        disabled={!isAuthenticated || isLiking || review.userId === user?.uid}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all ${
+                          !isAuthenticated || review.userId === user?.uid
+                            ? 'text-gray-500 cursor-not-allowed'
+                            : hasLiked
+                              ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                              : 'bg-white/5 text-text-secondary hover:bg-white/10 hover:text-white'
+                        }`}
+                      >
+                        {isLiking ? (
+                          <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : (
+                          <svg 
+                            className="w-4 h-4" 
+                            fill={hasLiked ? "currentColor" : "none"} 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                          </svg>
+                        )}
+                        <span className="text-sm font-medium">
+                          {likeCount > 0 ? likeCount : ''} {hasLiked ? 'Liked' : 'Like'}
+                        </span>
+                      </button>
+                      
+                      {review.userId === user?.uid && (
+                        <span className="text-text-secondary text-xs">Your review</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
