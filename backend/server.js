@@ -368,6 +368,8 @@ app.get("/person/:id", async (req, res) => {
     }
 });
 
+const path = require('path');
+
 // Export for Vercel
 module.exports = app;
 
@@ -376,6 +378,17 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, () => {
         console.log(`✅ Server is running on http://localhost:${PORT}`);
         console.log(`🎬 Using TMDB API`);
+    });
+} else {
+    // In production (Vercel), we might need to serve static files if rewrite fails or for direct access
+    // However, Vercel usually handles static files separately.
+    // This is just a safety measure for traditional hosting or specific setups
+    app.use(express.static(path.join(__dirname, '../frontend/dist')));
+    
+    app.get('*', (req, res) => {
+        if (!req.path.startsWith('/api')) {
+             res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+        }
     });
 }
 
