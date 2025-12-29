@@ -1,4 +1,11 @@
 function Footer() {
+  const teamMembers = [
+    { name: "Fajri Maulana Yusuf", nim: "5241011005" },
+    { name: "Dewa Sanjaya", nim: "5241011028" },
+    { name: "M. Adji Putra Sambodo", nim: "5241011039" },
+    { name: "M. Syahwan", nim: "5241011007" },
+  ];
+
   return (
     <footer className="bg-secondary border-t border-white/10 mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -28,16 +35,35 @@ function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-4">Categories</h4>
             <ul className="space-y-2 text-text-secondary text-sm">
-              <li><a href="/genres/action" className="hover:text-white transition">Action</a></li>
-              <li><a href="/genres/comedy" className="hover:text-white transition">Comedy</a></li>
-              <li><a href="/genres/drama" className="hover:text-white transition">Drama</a></li>
-              <li><a href="/genres/horror" className="hover:text-white transition">Horror</a></li>
+              <li><a href="/genres/28" className="hover:text-white transition">Action</a></li>
+              <li><a href="/genres/35" className="hover:text-white transition">Comedy</a></li>
+              <li><a href="/genres/18" className="hover:text-white transition">Drama</a></li>
+              <li><a href="/genres/27" className="hover:text-white transition">Horror</a></li>
             </ul>
+          </div>
+        </div>
+
+        {/* Team Credits */}
+        <div className="border-t border-white/10 mt-8 pt-8">
+          <h4 className="text-white font-semibold mb-4 text-center">Development Team</h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {teamMembers.map((member, index) => (
+              <div key={index} className="text-center p-4 bg-tertiary rounded-lg">
+                <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center mx-auto mb-2">
+                  <span className="text-white font-bold text-lg">
+                    {member.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                  </span>
+                </div>
+                <p className="text-white text-sm font-medium">{member.name}</p>
+                <p className="text-text-secondary text-xs">{member.nim}</p>
+              </div>
+            ))}
           </div>
         </div>
 
         <div className="border-t border-white/10 mt-8 pt-8 text-center text-text-secondary text-sm">
           <p>&copy; {new Date().getFullYear()} OnMovie. All rights reserved.</p>
+          <p className="mt-1">Tugas Praktik Basis Data - Kelompok</p>
         </div>
       </div>
     </footer>
