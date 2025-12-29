@@ -17,6 +17,15 @@ const Developers = {
 
 // Middleware
 app.use(cors());
+
+// Vercel Rewrite Handler: Strip /api prefix so routes match
+app.use((req, res, next) => {
+    if (req.url.startsWith('/api')) {
+        req.url = req.url.replace('/api', '');
+    }
+    next();
+});
+
 if (process.env.NODE_ENV !== "production") {
     app.use(morgan("dev"));
 }
