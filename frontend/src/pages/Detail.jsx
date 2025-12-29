@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getMovieDetails, getSeriesDetails, getMovieCredits, getSeriesCredits, getSimilarMovies, getSimilarSeries, getMovieRecommendations, getSeriesRecommendations } from '../api';
+import { getMovieDetails, getSeriesDetails, getMovieCredits, getSeriesCredits, getSimilarMovies, getSimilarSeries, getMovieRecommendations, getSeriesRecommendations, getMovieWatchProviders, getSeriesWatchProviders } from '../api';
 import { mockMovies, mockSeries } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
 import { addToFavorites, removeFromFavorites, isInFavorites, addToWatchlist, removeFromWatchlist, isInWatchlist } from '../firebase/firestore';
@@ -19,6 +19,7 @@ function Detail() {
   const [crew, setCrew] = useState([]);
   const [similar, setSimilar] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
+  const [watchProviders, setWatchProviders] = useState(null);
   const [loading, setLoading] = useState(true);
   const [usingMockData, setUsingMockData] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -46,16 +47,18 @@ function Detail() {
           
           // Fetch additional data in parallel
           try {
-            const [creditsRes, similarRes, recsRes] = await Promise.all([
+            const [creditsRes, similarRes, recsRes, providersRes] = await Promise.all([
               isMovie ? getMovieCredits(id) : getSeriesCredits(id),
               isMovie ? getSimilarMovies(id) : getSimilarSeries(id),
-              isMovie ? getMovieRecommendations(id) : getSeriesRecommendations(id)
+              isMovie ? getMovieRecommendations(id) : getSeriesRecommendations(id),
+              isMovie ? getMovieWatchProviders(id) : getSeriesWatchProviders(id)
             ]);
             
             setCast(creditsRes.data?.cast || []);
             setCrew(creditsRes.data?.crew || []);
             setSimilar(isMovie ? (similarRes.data?.movies || []) : (similarRes.data?.series || []));
             setRecommendations(isMovie ? (recsRes.data?.movies || []) : (recsRes.data?.series || []));
+            setWatchProviders(providersRes.data || null);
           } catch (additionalErr) {
             console.error('Error fetching additional data:', additionalErr);
           }
@@ -362,6 +365,86 @@ function Detail() {
             )}
           </div>
         </div>
+
+        {/* Where to Watch Section */}
+        {watchProviders && (watchProviders.flatrate?.length > 0 || watchProviders.rent?.length > 0 || watchProviders.buy?.length > 0) && (
+          <section className="mt-8 bg-tertiary rounded-xl p-6">
+            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Where to Watch
+            </h3>
+            <div className="space-y-4">
+              {/* Streaming */}
+              {watchProviders.flatrate?.length > 0 && (
+                <div>
+                  <p className="text-text-secondary text-sm mb-2">Stream</p>
+                  <div className="flex flex-wrap gap-3">
+                    {watchProviders.flatrate.map((provider) => (
+                      <div key={provider.id} className="group relative">
+                        <img
+                          src={provider.logo}
+                          alt={provider.name}
+                          className="w-12 h-12 rounded-lg object-cover bg-white"
+                          title={provider.name}
+                        />
+                        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-10">
+                          {provider.name}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Rent */}
+              {watchProviders.rent?.length > 0 && (
+                <div>
+                  <p className="text-text-secondary text-sm mb-2">Rent</p>
+                  <div className="flex flex-wrap gap-3">
+                    {watchProviders.rent.map((provider) => (
+                      <div key={provider.id} className="group relative">
+                        <img
+                          src={provider.logo}
+                          alt={provider.name}
+                          className="w-12 h-12 rounded-lg object-cover bg-white"
+                          title={provider.name}
+                        />
+                        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-10">
+                          {provider.name}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Buy */}
+              {watchProviders.buy?.length > 0 && (
+                <div>
+                  <p className="text-text-secondary text-sm mb-2">Buy</p>
+                  <div className="flex flex-wrap gap-3">
+                    {watchProviders.buy.map((provider) => (
+                      <div key={provider.id} className="group relative">
+                        <img
+                          src={provider.logo}
+                          alt={provider.name}
+                          className="w-12 h-12 rounded-lg object-cover bg-white"
+                          title={provider.name}
+                        />
+                        <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-10">
+                          {provider.name}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <p className="text-text-secondary text-xs mt-4">Data provided by JustWatch</p>
+          </section>
+        )}
 
         {/* Cast Section */}
         {cast.length > 0 && (

@@ -497,5 +497,61 @@ module.exports = {
     getTopRatedSeries,
     getAiringTodaySeries,
     // Now Playing
-    getNowPlayingMovies
+    getNowPlayingMovies,
+    // Watch Providers
+    getMovieWatchProviders,
+    getSeriesWatchProviders
 };
+
+// Watch Providers - Where to watch
+async function getMovieWatchProviders(movieId) {
+    try {
+        const response = await tmdbApi.get(`/movie/${movieId}/watch/providers`);
+        const results = response.data.results || {};
+        
+        // Try ID (Indonesia) first, fall back to US
+        const providers = results.ID || results.US || {};
+        
+        const formatProvider = (p) => ({
+            id: p.provider_id,
+            name: p.provider_name,
+            logo: p.logo_path ? `https://image.tmdb.org/t/p/w92${p.logo_path}` : null
+        });
+        
+        return {
+            link: providers.link || null,
+            flatrate: providers.flatrate?.map(formatProvider) || [], // Streaming
+            rent: providers.rent?.map(formatProvider) || [],
+            buy: providers.buy?.map(formatProvider) || []
+        };
+    } catch (error) {
+        console.error("Error fetching movie watch providers:", error);
+        return { flatrate: [], rent: [], buy: [], link: null };
+    }
+}
+
+async function getSeriesWatchProviders(seriesId) {
+    try {
+        const response = await tmdbApi.get(`/tv/${seriesId}/watch/providers`);
+        const results = response.data.results || {};
+        
+        // Try ID (Indonesia) first, fall back to US
+        const providers = results.ID || results.US || {};
+        
+        const formatProvider = (p) => ({
+            id: p.provider_id,
+            name: p.provider_name,
+            logo: p.logo_path ? `https://image.tmdb.org/t/p/w92${p.logo_path}` : null
+        });
+        
+        return {
+            link: providers.link || null,
+            flatrate: providers.flatrate?.map(formatProvider) || [], // Streaming
+            rent: providers.rent?.map(formatProvider) || [],
+            buy: providers.buy?.map(formatProvider) || []
+        };
+    } catch (error) {
+        console.error("Error fetching series watch providers:", error);
+        return { flatrate: [], rent: [], buy: [], link: null };
+    }
+}

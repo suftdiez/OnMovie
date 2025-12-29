@@ -59,4 +59,8 @@ export const getPersonDetails = (id) => api.get(`/person/${id}`);
 export const getMovieVideos = (id) => api.get(`/movies/${id}/videos`);
 export const getSeriesVideos = (id) => api.get(`/series/${id}/videos`);
 
+// Watch Providers
+export const getMovieWatchProviders = (id) => api.get(`/movies/${id}/providers`);
+export const getSeriesWatchProviders = (id) => api.get(`/series/${id}/providers`);
+
 export default api;

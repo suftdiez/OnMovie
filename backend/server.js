@@ -136,6 +136,16 @@ app.get("/movies/:id/stream", async (req, res) => {
     }
 });
 
+// Movie Watch Providers
+app.get("/movies/:id/providers", async (req, res) => {
+    try {
+        const providers = await tmdb.getMovieWatchProviders(req.params.id);
+        res.json({ status: true, developers: Developers, ...providers });
+    } catch (err) {
+        res.status(500).json({ status: false, developers: Developers, message: err.message });
+    }
+});
+
 // Search
 app.get("/search", async (req, res) => {
     try {
@@ -216,6 +226,16 @@ app.get("/series/:id/stream", async (req, res) => {
             return res.status(404).json({ status: false, developers: Developers, message: "Series not found" });
         }
         res.json({ status: true, developers: Developers, result: series });
+    } catch (err) {
+        res.status(500).json({ status: false, developers: Developers, message: err.message });
+    }
+});
+
+// Series Watch Providers
+app.get("/series/:id/providers", async (req, res) => {
+    try {
+        const providers = await tmdb.getSeriesWatchProviders(req.params.id);
+        res.json({ status: true, developers: Developers, ...providers });
     } catch (err) {
         res.status(500).json({ status: false, developers: Developers, message: err.message });
     }
