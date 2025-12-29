@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:8080';
+// Use updated API URL logic for Vercel
+const API_BASE = window.location.hostname === 'localhost' 
+  ? 'http://localhost:8080' 
+  : '/api';
 
 const api = axios.create({
   baseURL: API_BASE,
