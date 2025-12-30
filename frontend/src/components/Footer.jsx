@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 function Footer() {
   const teamMembers = [
     { name: "Fajri Maulana Yusuf", nim: "5241011005" },
@@ -24,10 +26,10 @@ function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-text-secondary text-sm">
-              <li><a href="/" className="hover:text-white transition">Home</a></li>
-              <li><a href="/movies" className="hover:text-white transition">Movies</a></li>
-              <li><a href="/series" className="hover:text-white transition">Series</a></li>
-              <li><a href="/genres" className="hover:text-white transition">Genres</a></li>
+              <li><Link to="/" className="hover:text-white transition">Home</Link></li>
+              <li><Link to="/movies" className="hover:text-white transition">Movies</Link></li>
+              <li><Link to="/series" className="hover:text-white transition">Series</Link></li>
+              <li><Link to="/genres" className="hover:text-white transition">Genres</Link></li>
             </ul>
           </div>
 
@@ -35,10 +37,10 @@ function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-4">Categories</h4>
             <ul className="space-y-2 text-text-secondary text-sm">
-              <li><a href="/genres/28" className="hover:text-white transition">Action</a></li>
-              <li><a href="/genres/35" className="hover:text-white transition">Comedy</a></li>
-              <li><a href="/genres/18" className="hover:text-white transition">Drama</a></li>
-              <li><a href="/genres/27" className="hover:text-white transition">Horror</a></li>
+              <li><Link to="/genres/28" className="hover:text-white transition">Action</Link></li>
+              <li><Link to="/genres/35" className="hover:text-white transition">Comedy</Link></li>
+              <li><Link to="/genres/18" className="hover:text-white transition">Drama</Link></li>
+              <li><Link to="/genres/27" className="hover:text-white transition">Horror</Link></li>
             </ul>
           </div>
         </div>
@@ -63,7 +65,7 @@ function Footer() {
 
         <div className="border-t border-white/10 mt-8 pt-8 text-center text-text-secondary text-sm">
           <p>&copy; {new Date().getFullYear()} OnMovie. All rights reserved.</p>
-          <p className="mt-1">Tugas Praktik Basis Data - Kelompok</p>
+          <p className="mt-1">Tugas Basis Data</p>
         </div>
       </div>
     </footer>
