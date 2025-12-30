@@ -382,13 +382,14 @@ const path = require('path');
 // Export for Vercel
 module.exports = app;
 
-// Start server only if not running in Vercel
-if (process.env.NODE_ENV !== 'production') {
+// Start server if run directly (Render, Local)
+// Vercel imports the app, so this won't run there
+if (require.main === module) {
     app.listen(PORT, () => {
         console.log(`✅ Server is running on http://localhost:${PORT}`);
         console.log(`🎬 Using TMDB API`);
     });
-} else {
+}
     // In production (Vercel), we might need to serve static files if rewrite fails or for direct access
     // However, Vercel usually handles static files separately.
     // This is just a safety measure for traditional hosting or specific setups

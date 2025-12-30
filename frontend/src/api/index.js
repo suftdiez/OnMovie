@@ -1,9 +1,10 @@
 import axios from 'axios';
 
 // Use updated API URL logic for Vercel
-const API_BASE = window.location.hostname === 'localhost' 
-  ? 'http://localhost:8080' 
-  : '/api';
+// Use environment variable if available (good for Render/Production)
+// Fallback to localhost for dev, or relative path '/api' for Vercel
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 
+  (window.location.hostname === 'localhost' ? 'http://localhost:8080' : '/api');
 
 const api = axios.create({
   baseURL: API_BASE,
