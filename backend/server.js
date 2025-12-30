@@ -393,12 +393,14 @@ if (require.main === module) {
     // In production (Vercel), we might need to serve static files if rewrite fails or for direct access
     // However, Vercel usually handles static files separately.
     // This is just a safety measure for traditional hosting or specific setups
-    app.use(express.static(path.join(__dirname, '../frontend/dist')));
-    
-    app.get('*', (req, res) => {
-        if (!req.path.startsWith('/api')) {
-             res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
-        }
-    });
-}
+// Static file serving is not needed for Render Backend Service
+// because Frontend is deployed separately as a Static Site.
+// app.use(express.static(path.join(__dirname, '../frontend/dist')));
+/*
+app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api')) {
+            res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+    }
+});
+*/
 
