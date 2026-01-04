@@ -1,4 +1,4 @@
-# OnMovie 🎬
+# OnMovie 
 
 Platform web untuk menjelajahi informasi film dan serial TV menggunakan TMDB API.
 
